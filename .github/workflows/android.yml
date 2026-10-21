@@ -49,8 +49,16 @@ jobs:
           mkdir -p "$HOME/.android"
           keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=KAYIP EVREN,C=TR"
           test -s "$HOME/.android/debug.keystore"
-          sed -i "s|\\$HOME/.android/debug.keystore|$HOME/.android/debug.keystore|g" export_presets.cfg
-          grep "keystore/debug=" export_presets.cfg
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p = Path("export_presets.cfg")
+          s = p.read_text()
+          s = s.replace('$HOME/.android/debug.keystore', str(Path.home() / '.android/debug.keystore'))
+          p.write_text(s)
+          assert 'keystore/debug="' + str(Path.home() / '.android/debug.keystore') + '"' in s
+          print("Resolved debug keystore path:", Path.home() / '.android/debug.keystore')
+          PY
       - name: Inspect Godot Android export configuration
         run: |
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
