@@ -12,10 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Blender
-        run: sudo apt-get update && sudo apt-get install -y blender
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender python3-numpy
+          blender -b --python-expr "import numpy; print('NUMPY_OK', numpy.__version__)"
       - name: Generate forest scene
         run: |
           mkdir -p output
+          set -o pipefail
           blender -b --python blender/generate_forest.py 2>&1 | tee blender.log
           test -f output/kayip_evren_v6.glb || cp /tmp/kayip_evren_v6.glb output/ 2>/dev/null || true
           test -f output/kayip_evren_v6.blend || cp /tmp/kayip_evren_v6.blend output/ 2>/dev/null || true
