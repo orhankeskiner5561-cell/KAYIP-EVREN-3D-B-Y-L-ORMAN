@@ -42,8 +42,11 @@ jobs:
           [resource]
           export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
           export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$HOME/.android/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
           EOF
-          ls -l "$ANDROID_SDK_ROOT/build-tools/35.0.0" "$JAVA_HOME"
+          ls -l "$ANDROID_SDK_ROOT/build-tools/34.0.0" "$JAVA_HOME"
       - name: Generate test-only Android signing key
         run: |
           mkdir -p "$HOME/.android"
@@ -74,6 +77,9 @@ jobs:
           grep 'keystore/debug=' export_presets.cfg
           test -s "$HOME/.android/debug.keystore"
           test -d "$ANDROID_SDK_ROOT/platform-tools"
+          test -s "$ANDROID_SDK_ROOT/platforms/android-34/android.jar"
+          test -x "$ANDROID_SDK_ROOT/build-tools/34.0.0/apksigner"
+          test -s "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
           echo "Godot editor settings after project initialization:"
           find "$HOME/.config/godot" -maxdepth 2 -type f -print
           grep -R 'export/android/' "$HOME/.config/godot" || true
