@@ -8,6 +8,9 @@ func _run() -> void:
         var platform = preset.get_platform()
         print("Preset: ", preset.get_name(), " platform: ", platform.get_name())
         print("Export path: ", preset.get_export_path())
-        print("Can export: ", platform.can_export(preset, true))
-        print("Has valid export configuration: ", platform.has_valid_export_configuration(preset, true))
+        for method_name in ["can_export", "has_valid_export_configuration", "has_valid_project_configuration"]:
+            if platform.has_method(method_name):
+                print("Method exists: ", method_name)
+            else:
+                print("Method not exposed: ", method_name)
     print("=== END DIAGNOSTIC ===")
