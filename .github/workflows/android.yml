@@ -23,7 +23,7 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0'
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0' 'platforms;android-35' 'build-tools;35.0.0'
       - name: Install Godot and Android export templates
         run: |
           wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
@@ -44,6 +44,11 @@ jobs:
           export/android/java_sdk_path = "$JAVA_HOME"
           EOF
           ls -l "$ANDROID_SDK_ROOT/build-tools/35.0.0" "$JAVA_HOME"
+      - name: Generate test-only Android signing key
+        run: |
+          mkdir -p "$HOME/.android"
+          keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=KAYIP EVREN,C=TR"
+          test -s "$HOME/.android/debug.keystore"
       - name: Import project
         run: ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit
       - name: Export APK
