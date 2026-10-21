@@ -49,15 +49,27 @@ jobs:
           mkdir -p "$HOME/.android"
           keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=KAYIP EVREN,C=TR"
           test -s "$HOME/.android/debug.keystore"
+      - name: Inspect Godot Android export configuration
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "JAVA_HOME=$JAVA_HOME"
+          ls -lah "$HOME/.config/godot/" || true
+          cat "$HOME/.config/godot/editor_settings-4.tres" || true
+          ls -lah "$HOME/.android/" || true
+          ls -lah "$HOME/.local/share/godot/export_templates/4.3.stable/" | head -20
+          cat export_presets.cfg
       - name: Import project
         run: ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit
       - name: Export APK
         run: |
           mkdir -p build
-          ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --export-debug Android build/kayip-evren-orman-test.apk
+          ./Godot_v4.3-stable_linux.x86_64 --headless --verbose --editor --path . --export-debug Android build/kayip-evren-orman-test.apk 2>&1 | tee build/export.log
+          test -s build/kayip-evren-orman-test.apk
           test -s build/kayip-evren-orman-test.apk
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: kayip-evren-android-test
-          path: build/*.apk
+          path: |
+            build/*.apk
+            build/export.log
