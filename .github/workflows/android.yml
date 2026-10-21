@@ -23,7 +23,7 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0' 'platforms;android-35' 'build-tools;35.0.0'
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0' 'build-tools;33.0.2' 'platforms;android-35' 'build-tools;35.0.0'
       - name: Install Godot and Android export templates
         run: |
           wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
@@ -88,9 +88,14 @@ jobs:
       - name: Diagnose Android preset through Godot
         run: |
           ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --script res://tools/diagnose_export.gd 2>&1 | tee build-diagnostic.log
+      - name: Start Android debug bridge
+        run: |
+          "$ANDROID_SDK_ROOT/platform-tools/adb" start-server
+          "$ANDROID_SDK_ROOT/platform-tools/adb" version
       - name: Export APK
         run: |
           mkdir -p build
+          set -o pipefail
           ./Godot_v4.3-stable_linux.x86_64 --headless --verbose --editor --path . --export-debug Android build/kayip-evren-orman-test.apk 2>&1 | tee build/export.log
           test -s build/kayip-evren-orman-test.apk
       - uses: actions/upload-artifact@v4
