@@ -60,6 +60,15 @@ jobs:
           ls -lah "$HOME/.android/" || true
           ls -lah "$HOME/.local/share/godot/export_templates/4.3.stable/" | head -20
           cat export_presets.cfg
+      - name: Diagnose Godot export settings
+        run: |
+          echo "Checking debug keystore and SDK..."
+          grep 'keystore/debug=' export_presets.cfg
+          test -s "$HOME/.android/debug.keystore"
+          test -d "$ANDROID_SDK_ROOT/platform-tools"
+          echo "Godot editor settings after project initialization:"
+          find "$HOME/.config/godot" -maxdepth 2 -type f -print
+          grep -R 'export/android/' "$HOME/.config/godot" || true
       - name: Import project
         run: ./Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit
       - name: Export APK
