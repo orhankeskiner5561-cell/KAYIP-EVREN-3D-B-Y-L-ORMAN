@@ -49,6 +49,8 @@ jobs:
           mkdir -p "$HOME/.android"
           keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=KAYIP EVREN,C=TR"
           test -s "$HOME/.android/debug.keystore"
+          sed -i "s|\\$HOME/.android/debug.keystore|$HOME/.android/debug.keystore|g" export_presets.cfg
+          grep "keystore/debug=" export_presets.cfg
       - name: Inspect Godot Android export configuration
         run: |
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
@@ -64,7 +66,6 @@ jobs:
         run: |
           mkdir -p build
           ./Godot_v4.3-stable_linux.x86_64 --headless --verbose --editor --path . --export-debug Android build/kayip-evren-orman-test.apk 2>&1 | tee build/export.log
-          test -s build/kayip-evren-orman-test.apk
           test -s build/kayip-evren-orman-test.apk
       - uses: actions/upload-artifact@v4
         if: always()
