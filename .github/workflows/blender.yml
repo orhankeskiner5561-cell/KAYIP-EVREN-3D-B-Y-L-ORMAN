@@ -14,15 +14,26 @@ jobs:
       - name: Install Blender
         run: sudo apt-get update && sudo apt-get install -y blender
       - name: Generate forest scene
-        run: blender -b --python blender/generate_forest.py
+        run: |
+          mkdir -p output
+          blender -b --python blender/generate_forest.py 2>&1 | tee blender.log
+          test -f output/kayip_evren_v6.glb || cp /tmp/kayip_evren_v6.glb output/ 2>/dev/null || true
+          test -f output/kayip_evren_v6.blend || cp /tmp/kayip_evren_v6.blend output/ 2>/dev/null || true
+      - name: Inspect outputs
+        if: always()
+        run: |
+          ls -lah /tmp/kayip_evren* output/ || true
+          tail -n 100 blender.log || true
       - name: Verify outputs
         run: |
-          test -s /tmp/kayip_evren_v6.blend
-          test -s /tmp/kayip_evren_v6.glb
-          ls -lh /tmp/kayip_evren_v6.*
-      - uses: actions/upload-artifact@v4
+          test -s output/kayip_evren_v6.blend
+          test -s output/kayip_evren_v6.glb
+      - name: Upload diagnostics and models
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: kayip-evren-v6-blender-glb
+          name: kayip-evren-v6-results
           path: |
-            /tmp/kayip_evren_v6.blend
-            /tmp/kayip_evren_v6.glb
+            output/
+            blender.log
+          if-no-files-found: warn
